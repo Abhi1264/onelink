@@ -1,239 +1,130 @@
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import {
-  Link2,
-  GripVertical,
-  BarChart3,
-  ArrowRight,
-  Github,
-} from "lucide-react";
 import Link from "next/link";
+import { ArrowRight, ArrowUpRight, BarChart3, Eye, GripVertical, Globe, Github } from "lucide-react";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
+
+const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || "localhost:3000";
+const REPO = "https://github.com/Abhi1264/onelink";
+
+const features = [
+  { icon: Globe, title: "Your own address", body: `A clean URL at yourname.${ROOT_DOMAIN}, ready for every bio.` },
+  { icon: GripVertical, title: "Drag to reorder", body: "Put what matters first. Changes go live the moment you drop." },
+  { icon: Eye, title: "Hide without deleting", body: "Toggle seasonal links off and bring them back when you need them." },
+  { icon: BarChart3, title: "Click counts", body: "See which links people actually open, per link, no setup." },
+];
+
+const sampleLinks = [
+  { title: "Portfolio", host: "maya.design", clicks: 1284 },
+  { title: "Latest case study", host: "medium.com", clicks: 842 },
+  { title: "Book a call", host: "cal.com", clicks: 316 },
+  { title: "Newsletter", host: "substack.com", clicks: 97 },
+];
 
 export default function Page() {
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950 noise-bg">
-      {/* Dot Pattern Background */}
-      <div className="fixed inset-0 dot-pattern dark:dot-pattern-dark pointer-events-none" />
-
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-950/80 backdrop-blur-sm">
-        <div className="container mx-auto px-4 sm:px-6 h-14 sm:h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Link2
-              size={20}
-              className="sm:w-6 sm:h-6 text-neutral-900 dark:text-neutral-50"
-              strokeWidth={2}
-            />
-            <span className="text-base sm:text-lg font-semibold tracking-precise">
-              Onelink
-            </span>
-          </div>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <a
-              href="https://github.com/Abhi1264/onelink"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-50 transition-colors"
-              aria-label="GitHub"
-            >
-              <Github size={20} strokeWidth={1.5} />
+    <div className="flex min-h-dvh flex-col">
+      <header className="sticky top-0 z-30 border-b bg-background/80 backdrop-blur">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
+          <Logo />
+          <nav className="flex items-center gap-1">
+            <a href={REPO} target="_blank" rel="noopener noreferrer" aria-label="GitHub repository" className={buttonVariants({ variant: "ghost", size: "icon", className: "text-muted-foreground" })}>
+              <Github />
             </a>
             <ThemeToggle />
-            <Link href="/login">
-              <Button variant="ghost" size="sm" className="h-8 sm:h-9 text-sm">
-                Sign In
-              </Button>
+            <Link href="/login" className={buttonVariants({ variant: "ghost", className: "hidden sm:inline-flex" })}>
+              Sign in
             </Link>
-            <Link href="/signup">
-              <Button
-                size="sm"
-                className="h-8 sm:h-9 text-sm bg-neutral-900 dark:bg-neutral-50 text-neutral-50 dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-200"
-              >
-                Start
-              </Button>
+            <Link href="/signup" className={buttonVariants()}>
+              Get started
             </Link>
-          </div>
+          </nav>
         </div>
       </header>
 
-      <main className="relative">
-        {/* Hero Section */}
-        <section className="container mx-auto px-4 sm:px-6 pt-16 sm:pt-24 pb-16 sm:pb-20 md:pt-32 md:pb-28">
-          <div className="max-w-4xl mx-auto text-center space-y-6 sm:space-y-8">
-            <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm text-xs sm:text-sm">
-              <div className="status-dot bg-green-500" />
-              <span className="font-medium">Built for creators</span>
-            </div>
-
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold heading-tight text-neutral-900 dark:text-neutral-50 px-4">
-              One Link.
-              <br />
-              Everything Connected.
+      <main className="flex-1">
+        <section className="mx-auto grid max-w-6xl items-center gap-14 px-4 pt-14 pb-20 sm:px-6 sm:pt-20 lg:grid-cols-[1.1fr_1fr] lg:gap-20 lg:pt-28 lg:pb-32">
+          <div>
+            <h1 className="text-4xl leading-[1.05] font-semibold sm:text-5xl lg:text-6xl">
+              One link for everything you share.
             </h1>
-
-            <p className="text-base sm:text-lg md:text-xl text-neutral-600 dark:text-neutral-400 max-w-2xl mx-auto leading-relaxed px-4">
-              A sophisticated link management platform designed for
-              professionals who value precision and clarity.
+            <p className="mt-5 max-w-lg text-lg leading-relaxed text-muted-foreground">
+              Put your work, socials, and latest projects behind a single URL. Reorder with a drag, hide what&apos;s stale, and see what people click.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 pt-4 sm:pt-6 px-4">
-              <Link href="/signup" className="w-full sm:w-auto">
-                <Button
-                  size="lg"
-                  className="w-full sm:w-auto h-11 sm:h-12 px-6 sm:px-8 bg-neutral-900 dark:bg-neutral-50 text-neutral-50 dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-200 shadow-hover"
-                >
-                  Create Your Profile
-                  <ArrowRight size={18} className="ml-2" />
-                </Button>
-              </Link>
-            </div>
-
-            {/* Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-12 pt-12 sm:pt-16 max-w-6xl mx-auto px-4">
-              {[
-                {
-                  label: "Custom Subdomains",
-                  value: "yourname.site.com",
-                  mono: true,
-                },
-                {
-                  label: "Drag & Drop Editor",
-                  value: "Reorder Instantly",
-                  mono: false,
-                },
-                {
-                  label: "Built-in Analytics",
-                  value: "Real-time clicks",
-                  mono: false,
-                },
-              ].map((feature) => (
-                <div key={feature.label} className="space-y-1 sm:space-y-2">
-                  <div
-                    className={`text-xl sm:text-2xl font-bold ${
-                      feature.mono ? "mono-meta" : ""
-                    }`}
-                  >
-                    {feature.value}
-                  </div>
-                  <div className="text-xs sm:text-sm text-neutral-500 dark:text-neutral-500">
-                    {feature.label}
-                  </div>
-                </div>
-              ))}
-            </div>
+            <form action="/signup" className="mt-9 flex max-w-md flex-col gap-2 sm:flex-row">
+              <label className="flex h-11 flex-1 items-center rounded-lg border border-input bg-card px-3 font-mono text-sm shadow-xs focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50">
+                <span className="sr-only">Choose a username</span>
+                <input
+                  name="username"
+                  placeholder="yourname"
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  pattern="[a-zA-Z0-9_\-]{3,30}"
+                  title="3-30 letters, numbers, - or _"
+                  className="w-0 min-w-0 flex-1 bg-transparent outline-none placeholder:text-muted-foreground"
+                />
+                <span className="text-muted-foreground">.{ROOT_DOMAIN}</span>
+              </label>
+              <Button type="submit" size="lg" className="h-11 px-5">
+                Claim it
+                <ArrowRight />
+              </Button>
+            </form>
+            <p className="mt-3 text-sm text-muted-foreground">Free and open source. Set up in under a minute.</p>
           </div>
+
+          <ProfilePreview />
         </section>
 
-        {/* Features Grid */}
-        <section className="container mx-auto px-4 sm:px-6 py-16 sm:py-20">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-12 sm:mb-16 space-y-2 sm:space-y-3 px-4">
-              <h2 className="text-3xl sm:text-4xl font-bold heading-tight">
-                Built for Scale
-              </h2>
-              <p className="text-base sm:text-lg text-neutral-600 dark:text-neutral-400 max-w-2xl mx-auto">
-                Enterprise-grade features in a simple, elegant interface
-              </p>
-            </div>
-
-            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
-              {[
-                {
-                  icon: Link2,
-                  title: "Unlimited Links",
-                  description:
-                    "Add and manage unlimited links with complete control over visibility and ordering.",
-                },
-                {
-                  icon: GripVertical,
-                  title: "Drag & Drop",
-                  description:
-                    "Precision reordering with haptic feedback. Intuitive interface for power users.",
-                },
-                {
-                  icon: BarChart3,
-                  title: "Analytics",
-                  description:
-                    "Real-time click tracking and insights. Understand what resonates with your audience.",
-                },
-              ].map((feature) => (
-                <Card
-                  key={feature.title}
-                  className="p-5 sm:p-6 border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 hover-lift-subtle border-focus shadow-sm"
-                >
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center mb-4 sm:mb-5">
-                    <feature.icon
-                      size={20}
-                      className="sm:w-6 sm:h-6 text-neutral-900 dark:text-neutral-50"
-                      strokeWidth={1.5}
-                    />
-                  </div>
-
-                  <h3 className="text-base sm:text-lg font-semibold mb-2 tracking-precise">
-                    {feature.title}
-                  </h3>
-
-                  <p className="text-sm text-neutral-600 dark:text-neutral-400 leading-relaxed">
-                    {feature.description}
-                  </p>
-                </Card>
-              ))}
-            </div>
+        <section className="border-t">
+          <div className="mx-auto grid max-w-6xl gap-x-10 gap-y-10 px-4 py-16 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:py-20">
+            {features.map(({ icon: Icon, title, body }) => (
+              <div key={title}>
+                <Icon className="size-5 text-muted-foreground" strokeWidth={1.75} />
+                <h2 className="mt-4 font-semibold">{title}</h2>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{body}</p>
+              </div>
+            ))}
           </div>
-        </section>
-
-        {/* CTA Section */}
-        <section className="container mx-auto px-4 sm:px-6 py-16 sm:py-20 mb-16 sm:mb-20">
-          <Card className="max-w-4xl mx-auto p-8 sm:p-12 md:p-16 border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm text-center">
-            <div className="space-y-4 sm:space-y-6">
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold heading-tight">
-                Ready to Start?
-              </h2>
-              <p className="text-base sm:text-lg text-neutral-600 dark:text-neutral-400 max-w-xl mx-auto px-4">
-                Create your personalized link hub in under 60 seconds.
-              </p>
-              <Link href="/signup" className="inline-block w-full sm:w-auto">
-                <Button
-                  size="lg"
-                  className="w-full sm:w-auto h-11 sm:h-12 px-8 sm:px-10 bg-neutral-900 dark:bg-neutral-50 text-neutral-50 dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-200 shadow-hover mt-4"
-                >
-                  Get Started Free
-                </Button>
-              </Link>
-            </div>
-          </Card>
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-neutral-200 dark:border-neutral-800 py-8 bg-white dark:bg-black opacity-100">
-        <div className="container mx-auto px-4 sm:px-6 flex justify-center">
-          <div className="flex flex-row items-center gap-8">
-            <div className="flex items-center gap-2">
-              <Link2
-                size={18}
-                className="sm:w-5 sm:h-5 text-neutral-900 dark:text-neutral-50"
-              />
-              <span className="text-sm sm:text-base font-semibold">
-                Onelink
-              </span>
-            </div>
-            <a
-              href="https://github.com/Abhi1264/onelink"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-50 transition-colors text-sm"
-            >
-              <Github size={18} strokeWidth={1.5} />
-              <span>View on GitHub</span>
-            </a>
-            <p className="text-xs sm:text-sm text-neutral-500 dark:text-neutral-500">
-              &copy; 2025 Onelink. Built with precision.
-            </p>
-          </div>
+      <footer className="border-t">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-6 text-sm text-muted-foreground sm:px-6">
+          <span>© {new Date().getFullYear()} Onelink</span>
+          <a href={REPO} target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-foreground">
+            Source on GitHub
+          </a>
         </div>
       </footer>
+    </div>
+  );
+}
+
+function ProfilePreview() {
+  return (
+    <div aria-hidden className="relative mx-auto w-full max-w-sm select-none">
+      <div className="absolute -inset-6 -z-10 rounded-[2.5rem] bg-muted/60" />
+      <div className="rounded-4xl border bg-background p-6 shadow-xl shadow-black/5">
+        <div className="flex flex-col items-center">
+          <span className="grid size-16 place-items-center rounded-full bg-primary text-2xl font-semibold text-primary-foreground">M</span>
+          <p className="mt-3 font-semibold">@maya</p>
+          <p className="font-mono text-xs text-muted-foreground">maya.{ROOT_DOMAIN}</p>
+        </div>
+        <ul className="mt-6 space-y-2.5">
+          {sampleLinks.map((link) => (
+            <li key={link.title} className="flex items-center gap-3 rounded-xl border bg-card px-4 py-3">
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-medium">{link.title}</span>
+                <span className="block truncate text-xs text-muted-foreground">{link.host}</span>
+              </span>
+              <span className="font-mono text-xs text-muted-foreground tabular-nums">{link.clicks.toLocaleString()}</span>
+              <ArrowUpRight className="size-3.5 text-muted-foreground" />
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }

@@ -9,8 +9,8 @@ const googleSans = Google_Sans({ variable: "--font-sans" });
 const googleSansCode = Google_Sans_Code({ variable: "--font-code" });
 
 export const metadata: Metadata = {
-  title: "Onelink - Your Link in Bio",
-  description: "Create your personalized link in bio page",
+  title: { default: "Onelink — One link for everything you share", template: "%s · Onelink" },
+  description: "A fast, simple link-in-bio page. Add your links, reorder them, and see what gets clicked.",
 };
 
 export default function RootLayout({
@@ -19,16 +19,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={googleSans.variable} suppressHydrationWarning>
-      <body
-        className={`${googleSans.variable} ${googleSansCode.variable} antialiased`}
-      >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
+    <html
+      lang="en"
+      className={`${googleSans.variable} ${googleSansCode.variable}`}
+      suppressHydrationWarning
+    >
+      <body className="font-sans antialiased">
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <PostHogProvider>
             {children}
             <Analytics />

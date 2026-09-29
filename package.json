@@ -11,7 +11,7 @@
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "db:reset": "tsx reset-db.ts"
+    "test": "tsx --test 'src/**/*.test.ts'"
   },
   "dependencies": {
     "@base-ui/react": "^1.0.0",

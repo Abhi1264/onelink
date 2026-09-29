@@ -1,136 +1,131 @@
 "use client";
 
+import { useOptimistic, useState, useTransition } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useRouter } from "next/navigation";
-import { Link } from "@/lib/db/schema";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { GripVertical, Loader2, Pencil, Trash2 } from "lucide-react";
+import type { Link } from "@/lib/db/schema";
 import { deleteLink, updateLink } from "@/app/actions/links";
-import { useState } from "react";
-import { GripVertical, Trash2, Eye, EyeOff } from "lucide-react";
+import { getHostname } from "@/lib/utils/url";
+import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { LinkForm } from "./link-form";
 
-interface SortableLinkProps {
-  link: Link;
-}
+export function SortableLink({ link }: { link: Link }) {
+  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({ id: link.id });
+  const [editing, setEditing] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [enabled, setEnabled] = useOptimistic(link.isEnabled);
+  const [, startTransition] = useTransition();
 
-export function SortableLink({ link }: SortableLinkProps) {
-  const router = useRouter();
-  const [isEnabled, setIsEnabled] = useState(link.isEnabled);
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: link.id });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
-  };
-
-  const handleToggle = async () => {
-    const newState = !isEnabled;
-    setIsEnabled(newState);
-    await updateLink(link.id, { isEnabled: newState });
-    router.refresh();
-  };
-
-  const handleDelete = async () => {
-    if (confirm("Delete this link? This action cannot be undone.")) {
-      await deleteLink(link.id);
-      router.refresh();
-    }
-  };
-
-  const hostname = (() => {
-    try {
-      return new URL(link.url).hostname.replace("www.", "");
-    } catch {
-      return link.url;
-    }
-  })();
+  const toggle = () =>
+    startTransition(async () => {
+      setEnabled(!enabled);
+      await updateLink(link.id, { isEnabled: !enabled });
+    });
 
   return (
-    <Card
+    <li
       ref={setNodeRef}
-      style={style}
-      className={`group border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm hover-lift-subtle border-focus transition-all ${
-        !isEnabled ? "opacity-50" : ""
-      }`}
+      style={{ transform: CSS.Translate.toString(transform), transition }}
+      className={`relative bg-card first:rounded-t-xl last:rounded-b-xl ${isDragging ? "z-10 shadow-lg ring-1 ring-border" : ""}`}
     >
-      <div className="p-3 sm:p-4 flex items-center gap-2 sm:gap-3">
-        {/* Drag Handle */}
-        <button
-          className="cursor-grab active:cursor-grabbing touch-none p-1.5 sm:p-2 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded-md transition-colors"
-          {...attributes}
-          {...listeners}
-        >
-          <GripVertical
-            size={16}
-            className="text-neutral-400"
-            strokeWidth={1.5}
+      {editing ? (
+        <div className="p-4">
+          <LinkForm
+            defaultValues={link}
+            submitLabel="Save"
+            onCancel={() => setEditing(false)}
+            onSubmit={async (values) => {
+              const result = await updateLink(link.id, values);
+              if (!result.error) setEditing(false);
+              return result;
+            }}
           />
-        </button>
-
-        {/* Content */}
-        <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-sm mb-0.5 truncate tracking-precise">
-            {link.title}
-          </h3>
-          <div className="flex items-center gap-2 text-xs text-neutral-500">
-            <span className="mono-meta truncate max-w-[100px] sm:max-w-[200px]">
-              {hostname}
-            </span>
-            <span className="hidden xs:inline">·</span>
-            <span className="mono-meta whitespace-nowrap">{link.clicks}</span>
-          </div>
         </div>
-
-        {/* Status & Actions */}
-        <div className="flex items-center gap-0.5 sm:gap-1">
-          <div
-            className={`hidden sm:block px-2 py-1 rounded-md text-xs font-medium ${
-              isEnabled
-                ? "bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400"
-                : "bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400"
-            }`}
+      ) : (
+        <div className="flex items-center gap-1 py-3 pr-3 pl-1 sm:gap-2">
+          <button
+            ref={setActivatorNodeRef}
+            {...attributes}
+            {...listeners}
+            aria-label={`Reorder ${link.title}`}
+            className="grid h-10 w-8 shrink-0 cursor-grab touch-none place-items-center rounded-md text-muted-foreground/60 hover:text-foreground focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none active:cursor-grabbing"
           >
-            {isEnabled ? "Live" : "Hidden"}
+            <GripVertical className="size-4" />
+          </button>
+
+          <div className={`min-w-0 flex-1 transition-opacity ${enabled ? "" : "opacity-50"}`}>
+            <p className="truncate text-sm font-medium">{link.title}</p>
+            <a
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block truncate font-mono text-xs text-muted-foreground hover:text-foreground hover:underline"
+            >
+              {getHostname(link.url)}
+            </a>
           </div>
 
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={handleToggle}
-            className="h-8 w-8 p-0 hover:bg-neutral-100 dark:hover:bg-neutral-800"
-            title={isEnabled ? "Hide link" : "Show link"}
+          <span className="hidden shrink-0 text-xs text-muted-foreground tabular-nums sm:block" title="Clicks">
+            {link.clicks.toLocaleString()} {link.clicks === 1 ? "click" : "clicks"}
+          </span>
+
+          <button
+            role="switch"
+            aria-checked={enabled}
+            aria-label={enabled ? `Hide ${link.title}` : `Show ${link.title}`}
+            onClick={toggle}
+            className="relative mx-1 inline-flex h-5 w-9 shrink-0 items-center rounded-full bg-input transition-colors focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none aria-checked:bg-success"
           >
-            {isEnabled ? (
-              <Eye size={16} strokeWidth={1.5} className="text-green-600" />
-            ) : (
-              <EyeOff
-                size={16}
-                strokeWidth={1.5}
-                className="text-neutral-400"
-              />
-            )}
+            <span className={`size-4 rounded-full bg-white shadow-sm transition-transform ${enabled ? "translate-x-4.5" : "translate-x-0.5"}`} />
+          </button>
+
+          <Button variant="ghost" size="icon-sm" aria-label={`Edit ${link.title}`} onClick={() => setEditing(true)} className="text-muted-foreground">
+            <Pencil />
           </Button>
 
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={handleDelete}
-            className="h-8 w-8 p-0 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/10"
-            title="Delete link"
-          >
-            <Trash2 size={16} strokeWidth={1.5} />
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger
+              render={<Button variant="ghost" size="icon-sm" aria-label={`Delete ${link.title}`} className="text-muted-foreground hover:text-destructive" />}
+            >
+              <Trash2 />
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete “{link.title}”?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  It’ll be removed from your page along with its {link.clicks.toLocaleString()} recorded clicks. This can’t be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  variant="destructive"
+                  disabled={deleting}
+                  onClick={async () => {
+                    setDeleting(true);
+                    await deleteLink(link.id);
+                  }}
+                >
+                  {deleting && <Loader2 className="animate-spin" />}
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
-      </div>
-    </Card>
+      )}
+    </li>
   );
 }

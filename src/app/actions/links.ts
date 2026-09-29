@@ -1,102 +1,72 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { links, type NewLink } from "@/lib/db/schema";
+import { links } from "@/lib/db/schema";
 import { auth } from "@/lib/auth";
+import { normalizeUrl } from "@/lib/utils/url";
 import { headers } from "next/headers";
-import { eq, and, desc, sql } from "drizzle-orm";
+import { eq, and, max } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
+type LinkInput = { title?: string; url?: string; isEnabled?: boolean };
+type Result = { error?: string };
+
 async function getUserId() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
-
-  if (!session?.user?.id) {
-    throw new Error("Unauthorized");
-  }
-
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) throw new Error("Unauthorized");
   return session.user.id;
 }
 
-export async function createLink(
-  data: Omit<NewLink, "userId" | "order" | "clicks">,
-) {
-  const userId = await getUserId();
-
-  const maxOrderResult = await db
-    .select({ maxOrder: links.order })
-    .from(links)
-    .where(eq(links.userId, userId))
-    .orderBy(desc(links.order))
-    .limit(1);
-
-  const nextOrder = (maxOrderResult[0]?.maxOrder ?? -1) + 1;
-
-  const [newLink] = await db
-    .insert(links)
-    .values({
-      ...data,
-      userId,
-      order: nextOrder,
-    })
-    .returning();
-
-  revalidatePath("/admin");
-  return newLink;
+/** Returns the sanitized fields, or an error message string. */
+function parse(input: LinkInput): LinkInput | string {
+  const data: LinkInput = {};
+  if (input.title !== undefined) {
+    data.title = input.title.trim().slice(0, 100);
+    if (!data.title) return "Add a title.";
+  }
+  if (input.url !== undefined) {
+    const url = normalizeUrl(input.url);
+    if (!url) return "Enter a valid web address, like example.com.";
+    data.url = url;
+  }
+  if (input.isEnabled !== undefined) data.isEnabled = !!input.isEnabled;
+  return data;
 }
 
-export async function updateLink(linkId: number, data: Partial<NewLink>) {
+export async function createLink(input: { title: string; url: string }): Promise<Result> {
   const userId = await getUserId();
+  const data = parse(input);
+  if (typeof data === "string") return { error: data };
 
-  const [updatedLink] = await db
-    .update(links)
-    .set(data)
-    .where(and(eq(links.id, linkId), eq(links.userId, userId)))
-    .returning();
-
+  const [{ top }] = await db.select({ top: max(links.order) }).from(links).where(eq(links.userId, userId));
+  const { title, url } = data as Required<LinkInput>;
+  await db.insert(links).values({ title, url, userId, order: (top ?? -1) + 1 });
   revalidatePath("/admin");
-  return updatedLink;
+  return {};
+}
+
+export async function updateLink(linkId: number, input: LinkInput): Promise<Result> {
+  const userId = await getUserId();
+  const data = parse(input);
+  if (typeof data === "string") return { error: data };
+
+  await db.update(links).set(data).where(and(eq(links.id, linkId), eq(links.userId, userId)));
+  revalidatePath("/admin");
+  return {};
 }
 
 export async function deleteLink(linkId: number) {
   const userId = await getUserId();
-
-  await db
-    .delete(links)
-    .where(and(eq(links.id, linkId), eq(links.userId, userId)));
-
+  await db.delete(links).where(and(eq(links.id, linkId), eq(links.userId, userId)));
   revalidatePath("/admin");
 }
 
 export async function reorderLinks(linkIds: number[]) {
   const userId = await getUserId();
-
   await db.transaction(async (tx) => {
-    for (let i = 0; i < linkIds.length; i++) {
-      await tx
-        .update(links)
-        .set({ order: i })
-        .where(and(eq(links.id, linkIds[i]), eq(links.userId, userId)));
+    for (const [order, id] of linkIds.entries()) {
+      await tx.update(links).set({ order }).where(and(eq(links.id, id), eq(links.userId, userId)));
     }
   });
-
   revalidatePath("/admin");
-}
-
-export async function getUserLinks() {
-  const userId = await getUserId();
-
-  return await db
-    .select()
-    .from(links)
-    .where(eq(links.userId, userId))
-    .orderBy(links.order);
-}
-
-export async function incrementLinkClicks(linkId: number) {
-  await db
-    .update(links)
-    .set({ clicks: sql`${links.clicks} + 1` })
-    .where(eq(links.id, linkId));
 }
