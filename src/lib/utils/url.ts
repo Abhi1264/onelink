@@ -1,7 +1,7 @@
 const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || "localhost:3000";
 
 export function getProfileHost(username: string) {
-  return `${username}.${ROOT_DOMAIN}`;
+  return `${ROOT_DOMAIN}/${username}`;
 }
 
 export function getProfileUrl(username: string) {

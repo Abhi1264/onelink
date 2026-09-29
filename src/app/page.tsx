@@ -8,7 +8,7 @@ const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || "localhost:3000";
 const REPO = "https://github.com/Abhi1264/onelink";
 
 const features = [
-  { icon: Globe, title: "Your own address", body: `A clean URL at yourname.${ROOT_DOMAIN}, ready for every bio.` },
+  { icon: Globe, title: "Your own address", body: `A clean URL at ${ROOT_DOMAIN}/yourname, ready for every bio.` },
   { icon: GripVertical, title: "Drag to reorder", body: "Put what matters first. Changes go live the moment you drop." },
   { icon: Eye, title: "Hide without deleting", body: "Toggle seasonal links off and bring them back when you need them." },
   { icon: BarChart3, title: "Click counts", body: "See which links people actually open, per link, no setup." },
@@ -55,6 +55,7 @@ export default function Page() {
             <form action="/signup" className="mt-9 flex max-w-md flex-col gap-2 sm:flex-row">
               <label className="flex h-11 flex-1 items-center rounded-lg border border-input bg-card px-3 font-mono text-sm shadow-xs focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50">
                 <span className="sr-only">Choose a username</span>
+                <span className="text-muted-foreground">{ROOT_DOMAIN}/</span>
                 <input
                   name="username"
                   placeholder="yourname"
@@ -64,7 +65,6 @@ export default function Page() {
                   title="3-30 letters, numbers, - or _"
                   className="w-0 min-w-0 flex-1 bg-transparent outline-none placeholder:text-muted-foreground"
                 />
-                <span className="text-muted-foreground">.{ROOT_DOMAIN}</span>
               </label>
               <Button type="submit" size="lg" className="h-11 px-5">
                 Claim it
@@ -110,7 +110,7 @@ function ProfilePreview() {
         <div className="flex flex-col items-center">
           <span className="grid size-16 place-items-center rounded-full bg-primary text-2xl font-semibold text-primary-foreground">M</span>
           <p className="mt-3 font-semibold">@maya</p>
-          <p className="font-mono text-xs text-muted-foreground">maya.{ROOT_DOMAIN}</p>
+          <p className="font-mono text-xs text-muted-foreground">{ROOT_DOMAIN}/maya</p>
         </div>
         <ul className="mt-6 space-y-2.5">
           {sampleLinks.map((link) => (
