@@ -7,7 +7,8 @@ if (!process.env.DATABASE_URL) {
 }
 
 const client = postgres(process.env.DATABASE_URL, {
-  max: 10,
+  max: 1,
+  prepare: false,
   idle_timeout: 20,
   connect_timeout: 10,
 });
